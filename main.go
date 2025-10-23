@@ -7,6 +7,9 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+
 	_ "github.com/lib/pq" // <- El guion bajo es clave para solo registrar el driver
 )
 
@@ -42,8 +45,20 @@ func setupDB() *sql.DB {
 func setupRouter(db *sql.DB) http.Handler {
 	r := chi.NewRouter()
 
-	// r.Use(middleware.Logger) // (Lo haremos en la próxima clase, por ahora lo ignoramos para no añadir más importaciones)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.Logger)
 
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{"http://*", "https://*"},
+
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+
+		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+
+		AllowCredentials: true,
+
+		MaxAge: 300,
+	}))
 	// Rutas CRUD
 	r.Post("/productos", CreateProductHandler(db))
 	r.Get("/productos", GetProductsHandler(db)) // ¡CORREGIDO: GetProductsHandler!
@@ -71,3 +86,20 @@ func main() {
 		log.Fatal(err)
 	}
 }
+
+/*
+ * CLASE: ENRUTAMIENTO PROFESIONAL (FASE 3 - CHI)
+ *
+ * OBJETIVO: Reemplazar el router básico (http.ServeMux) por 'github.com/go-chi/chi/v5'
+ * para obtener código modular, limpio y escalable.
+ *
+ * CAMBIOS CLAVE:
+ * 1. setupRouter(): Esta función centraliza toda la configuración del enrutamiento.
+ * 2. r.METODO(ruta, handler): Chi registra rutas por método HTTP (r.Post, r.Get, etc.),
+ * eliminando la necesidad de usar 'if r.Method == "..."' dentro de los handlers.
+ * 3. Rutas Dinámicas: Se usa la sintaxis '/productos/{id}' para definir variables de URL.
+ *
+ * PRÓXIMOS PASOS:
+ * - Se integrará el Middleware (r.Use) para Seguridad (CORS) y Logging.
+ * - Se completará la función main() para iniciar el servidor con el router 'chi'.
+ */
