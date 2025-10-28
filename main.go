@@ -10,10 +10,10 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 
-	_ "github.com/lib/pq" // <- El guion bajo es clave para solo registrar el driver
+	_ "github.com/lib/pq"
 )
 
-// Constantes de conexión (¡Asegúrate que estas son TUS credenciales!)
+// Constantes de conexión
 const (
 	host     = "localhost"
 	port     = 5432
@@ -21,6 +21,9 @@ const (
 	password = "123456"
 	dbname   = "ecom_db"
 )
+
+// Clave Secreta JWT
+const jwtSecretKey = "ClaveSecretaParaFirmarJWT123456789!@#$"
 
 // Función auxiliar para crear la conexión a la DB
 func setupDB() *sql.DB {
@@ -41,46 +44,56 @@ func setupDB() *sql.DB {
 	return db
 }
 
-// Router que ya tenías
+// Router que incluye TODAS las rutas y la lógica de seguridad
 func setupRouter(db *sql.DB) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Logger)
 
+	// Middleware CORS
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"http://*", "https://*"},
-
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-
-		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-
+		AllowedOrigins:   []string{"http://*", "https://*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		AllowCredentials: true,
-
-		MaxAge: 300,
+		MaxAge:           300,
 	}))
-	// Rutas CRUD
-	r.Post("/productos", CreateProductHandler(db))
-	r.Get("/productos", GetProductsHandler(db)) // ¡CORREGIDO: GetProductsHandler!
 
-	r.Get("/productos/{id}", GetProductByIDHandler(db))
-	r.Put("/productos/{id}", UpdateProductHandler(db))
-	r.Delete("/productos/{id}", DeleteProductHandler(db))
+	// --- 1. RUTAS PÚBLICAS Y DE AUTENTICACIÓN ---
+	r.Group(func(r chi.Router) {
+		// La ruta de LOGIN debe ser pública
+		r.Post("/login", LogingHandler)
+	})
+
+	// --- 2. RUTAS PROTEGIDAS CON AUTH MIDDLEWARE (Productos) ---
+	r.Route("/productos", func(r chi.Router) {
+
+		// ⬇️ Aplicamos el VIGILANTE JWT a todas las rutas que siguen
+		r.Use(AuthMiddleware(jwtSecretKey))
+
+		// Rutas CRUD Protegidas. Solo se accede si el JWT es válido
+		r.Post("/", CreateProductHandler(db))
+		r.Get("/", GetProductsHandler(db))
+		r.Get("/{id}", GetProductByIDHandler(db))
+		r.Put("/{id}", UpdateProductHandler(db))
+		r.Delete("/{id}", DeleteProductHandler(db))
+	})
 
 	return r
 }
 
-// ⬇️ FUNCIÓN MAIN COMPLETA ⬇️
+// FUNCIÓN MAIN FINAL
 func main() {
-	// 1. Conexión a la DB (usa las constantes)
+	// 1. Conexión a la DB
 	db := setupDB()
-	defer db.Close() // Asegurar que la conexión se cierre
+	defer db.Close()
 
-	// 2. Configuración de Rutas (usa setupRouter)
-	router := setupRouter(db)
+	// 2. Configuración de Rutas y Seguridad
+	router := setupRouter(db) // Solo una vez
 
 	log.Println("Servidor escuchando en :8080...")
-	// 3. Iniciar el Servidor (usa la función router)
+	// 3. Iniciar el Servidor
 	err := http.ListenAndServe(":8080", router)
 	if err != nil {
 		log.Fatal(err)

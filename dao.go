@@ -14,11 +14,13 @@ import (
 // ====================================================================
 
 // CreateProduct (Crear Producto): Inserta un nuevo producto y devuelve el producto con el ID asignado.
-func CreateProduct(db *sql.DB, product Product) (Product, error) {
+func CreateProduct(db *sql.DB, product Product, userID int) (Product, error) {
+
+	// ⬇️ CAMBIO 2: Incluir la nueva columna (creator_id) y el nuevo placeholder ($5)
 	sqlStatement := `
-		INSERT INTO products (name, description, price, stock)
-		VALUES ($1, $2, $3, $4)
-		RETURNING id` // RETURNING id es clave
+		INSERT INTO products (name, description, price, stock, creator_id) 
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id`
 
 	var id int
 	err := db.QueryRow(
@@ -27,14 +29,17 @@ func CreateProduct(db *sql.DB, product Product) (Product, error) {
 		product.Description,
 		product.Price,
 		product.Stock,
-	).Scan(&id) // Escanea el ID devuelto
+		userID, // ⬅️ CAMBIO 3: Pasar el userID como quinto argumento de la consulta
+	).Scan(&id)
 
 	if err != nil {
-		// Encapsulamiento de error con %w para rastrear el origen
 		return Product{}, fmt.Errorf("error al ejecutar INSERT en DB: %w", err)
 	}
 
 	product.ID = id
+	// Nota: Si quieres devolver el UserID, debes añadirlo al struct Product.
+	// product.CreatorID = userID
+
 	return product, nil
 }
 
@@ -137,3 +142,18 @@ func DeleteProduct(db *sql.DB, id int) error {
 
 	return nil
 }
+
+/*
+ * CLASE: ENRUTAMIENTO PROFESIONAL (DAO - ROBUSTEZ)
+ *
+ * OBJETIVO: Mejorar la calidad y el manejo de errores del Data Access Object (DAO).
+ *
+ * CAMBIOS CLAVE EN DAO:
+ * 1. Manejo de 404 (Not Found): Las funciones UpdateProduct y DeleteProduct ahora verifican
+ * 'result.RowsAffected()'. Si es 0, devuelven un error específico ("no encontrado").
+ * Esto permite al handler superior devolver el código HTTP 404 correcto.
+ * 2. Encapsulamiento de Errores: Uso de 'fmt.Errorf("mensaje útil: %w", err)' para envolver
+ * los errores de SQL. Esto facilita el rastreo de fallos y el testing profesional.
+ * 3. Firma de Funciones: Se estandarizó 'CreateProduct' para devolver el objeto 'Product'
+ * completo (con ID) en lugar de solo el ID, mejorando la coherencia de la API.
+ */

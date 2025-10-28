@@ -21,6 +21,15 @@ type Product struct {
 	Stock       int     `json:"stock"`
 }
 
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type LogingResponse struct {
+	Token string `json:"token"`
+}
+
 // ====================================================================
 // Handlers (Manejadores de Peticiones HTTP)
 // ====================================================================
@@ -28,24 +37,35 @@ type Product struct {
 // POST /productos: Crea un nuevo producto
 func CreateProductHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
+		// 1. Obtener la Identidad del Contexto (UserID)
+		userID, err := GetUserIDFromContext(r)
+		if err != nil {
+			// Este es el flujo de seguridad para verificar que la identidad esté presente.
+			http.Error(w, "Sesión de usuario inválida o ausente", http.StatusUnauthorized)
+			return
+		}
+
 		var product Product
 
-		// 1. Decodificar el cuerpo JSON
-		err := json.NewDecoder(r.Body).Decode(&product)
+		// 2. Decodificar el cuerpo JSON
+		// ⬇️ CORRECCIÓN DE SINTAXIS: Usar '=' en lugar de ':='
+		err = json.NewDecoder(r.Body).Decode(&product)
 		if err != nil {
 			http.Error(w, "JSON inválido o campos faltantes", http.StatusBadRequest)
 			return
 		}
 
-		// 2. Llamada al DAO para crear el producto
-		createdProduct, err := CreateProduct(db, product)
+		// 3. Llamada al DAO para crear el producto (¡LÓGICA CORREGIDA!)
+		// ⬇️ PASAMOS EL USERID al DAO para que sepa quién lo creó.
+		createdProduct, err := CreateProduct(db, product, userID)
 		if err != nil {
-			log.Printf("DB error al crear producto: %v", err)
+			log.Printf("DB error al crear producto (UserID %d): %v", userID, err)
 			http.Error(w, "Error interno del servidor", http.StatusInternalServerError)
 			return
 		}
 
-		// 3. Respuesta de éxito 201 Created
+		// 4. Respuesta de éxito 201 Created
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(createdProduct)
@@ -179,3 +199,39 @@ func DeleteProductHandler(db *sql.DB) http.HandlerFunc {
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
+
+func LogingHandler(w http.ResponseWriter, r *http.Request) {
+	var request LoginRequest
+
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return // Detenemos la función aquí
+	}
+	const userID = 123
+	const userRole = "admin"
+	tokenString, err := GenerateToken(userID, userRole, jwtSecretKey)
+
+	if err != nil {
+		http.Error(w, "Error generating token", http.StatusInternalServerError)
+		return // Detenemos la función aquí
+	}
+	response := LogingResponse{Token: tokenString}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}
+
+/*
+ * CLASE: ENRUTAMIENTO PROFESIONAL (HANDLERS)
+ *
+ * OBJETIVO: Limpiar la lógica de los handlers al delegar el trabajo de enrutamiento a 'chi'.
+ *
+ * CAMBIOS CLAVE EN HANDLERS:
+ * 1. Adiós a strings.Split: Los handlers de recurso (ej. Get/Put/Delete por ID) ya no
+ * necesitan dividir la URL manualmente para obtener el ID.
+ * 2. chi.URLParam(r, "id"): Esta función extrae el parámetro '{id}' directamente del
+ * contexto de la petición (r), simplificando drásticamente el código de validación de ruta.
+ * 3. Enfoque: Los handlers ahora se enfocan únicamente en la LÓGICA DE NEGOCIO (Decodificar
+ * JSON, llamar al DAO y responder), ya que la verificación de método y ruta está en main.go.
+ */
