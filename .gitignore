@@ -12,3 +12,6 @@
 # Archivos de caché de Go
 .go/
 .cache/
+
+# Variables de entorno (NO subir a GitHub)
+.env
