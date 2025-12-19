@@ -1,6 +1,37 @@
 # 🚀 Go API Chi - E-commerce Backend
 
-API REST desarrollada en Go utilizando el framework Chi para gestión de productos de e-commerce.
+![Go Version](https://img.shields.io/badge/Go-1.23-00ADD8?style=flat&logo=go)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-326CE5?style=flat&logo=kubernetes)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=flat&logo=postgresql)
+
+> API REST robusta en Go para gestión de productos con JWT, Docker y Kubernetes.
+
+---
+
+## 📸 Vista Rápida
+
+### Arquitectura
+```
+┌──────────────┐      ┌──────────────┐      ┌──────────────┐
+│   Cliente    │ ───▶ │   API Go     │ ───▶ │  PostgreSQL  │
+│  (HTTP/JSON) │ ◀─── │ (Chi Router) │ ◀─── │   Database   │
+└──────────────┘      └──────────────┘      └──────────────┘
+```
+
+### Ejemplo de uso
+```bash
+# Login
+curl -X POST http://localhost:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"password"}'
+
+# Obtener productos
+curl -X GET http://localhost:8080/productos \
+  -H "Authorization: Bearer {token}"
+```
+
+---
 
 ## 📋 Tabla de Contenidos
 
@@ -286,6 +317,25 @@ curl -X GET http://localhost:8080/productos \
 ## 📄 Licencia
 
 Este proyecto es de código abierto para fines educativos.
+
+---
+
+## 🎯 Skills Demostradas
+
+### Backend Development
+- ✅ API REST con Chi Router
+- ✅ Autenticación JWT
+- ✅ CRUD completo con PostgreSQL
+
+### DevOps & Infrastructure
+- ✅ Dockerización con multi-stage builds
+- ✅ Kubernetes manifests (Deployments, Services)
+- ✅ Gestión de volúmenes persistentes
+
+### Best Practices
+- ✅ Git flow con commits descriptivos
+- ✅ Documentación completa
+- ✅ Código modular y mantenible
 
 ---
 
