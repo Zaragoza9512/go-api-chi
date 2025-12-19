@@ -15,7 +15,7 @@ import (
 
 // Constantes de conexión
 const (
-	host     = "localhost"
+	host     = "postgres"
 	port     = 5432
 	user     = "postgres"
 	password = "123456"

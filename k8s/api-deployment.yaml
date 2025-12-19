@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-api
+  labels:
+    app: go-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: go-api
+  template:
+    metadata:
+      labels:
+        app: go-api
+    spec:
+      containers:
+      - name: go-api
+        image: go-api-chi:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_HOST
+          value: "postgres"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          value: "postgres"
+        - name: DB_PASSWORD
+          value: "123456"
+        - name: DB_NAME
+          value: "ecom_db"
+        - name: JWT_SECRET
+          value: "mi-super-secreto-jwt-cambiar-en-produccion"
