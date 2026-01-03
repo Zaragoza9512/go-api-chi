@@ -30,24 +30,23 @@ jobs:
         run: go build -v ./...
 
  
-// Tú: git push → GitHub Actions:
+# Tú: git push → GitHub Actions:
 
-// Step 1: Descargar código ✅
-//  └─ Clona tu repo en /home/runner/work/go-api-chi/
+# Step 1: Descargar código ✅
+#  └─ Clona tu repo en /home/runner/work/go-api-chi/
 
-// Step 2: Configurar Go ✅
-//  └─ Instala Go 1.23
+# Step 2: Configurar Go ✅
+#  └─ Instala Go 1.23
 
-// Step 3: Descargar dependencias ✅
-//  └─ Ejecuta: go mod download
+# Step 3: Descargar dependencias ✅
+#  └─ Ejecuta: go mod download
 
-// Step 4: Ejecutar tests ✅
-//  └─ Ejecuta: go test -v ./...
-//  └─ Si FALLA → Pipeline se detiene ❌
-//  └─ Si PASA → Continúa ✅
+# Step 4: Ejecutar tests ✅
+#  └─ Ejecuta: go test -v ./...
+#  └─ Si FALLA → Pipeline se detiene ❌
+#  └─ Si PASA → Continúa ✅
 
-// Step 5: Compilar aplicación ✅
-// └─ Ejecuta: go build -v ./...
-//  └─ Si FALLA → Pipeline se detiene ❌
-//  └─ Si PASA → Workflow completo ✅ 
-*/
+# Step 5: Compilar aplicación ✅
+# └─ Ejecuta: go build -v ./...
+#  └─ Si FALLA → Pipeline se detiene ❌
+#  └─ Si PASA → Workflow completo ✅ 
