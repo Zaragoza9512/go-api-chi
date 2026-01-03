@@ -1,0 +1,53 @@
+name: Go CI/CD go-api-chi
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-build:
+    name: Test and Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Descargar código del repositorio
+        uses: actions/checkout@v4
+      
+      - name: Configurar Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      
+      - name: Descargar dependencias
+        run: go mod download
+      
+      - name: Ejecutar tests
+        run: go test -v ./...
+      
+      - name: Compilar aplicación
+        run: go build -v ./...
+
+ 
+// Tú: git push → GitHub Actions:
+
+// Step 1: Descargar código ✅
+//  └─ Clona tu repo en /home/runner/work/go-api-chi/
+
+// Step 2: Configurar Go ✅
+//  └─ Instala Go 1.23
+
+// Step 3: Descargar dependencias ✅
+//  └─ Ejecuta: go mod download
+
+// Step 4: Ejecutar tests ✅
+//  └─ Ejecuta: go test -v ./...
+//  └─ Si FALLA → Pipeline se detiene ❌
+//  └─ Si PASA → Continúa ✅
+
+// Step 5: Compilar aplicación ✅
+// └─ Ejecuta: go build -v ./...
+//  └─ Si FALLA → Pipeline se detiene ❌
+//  └─ Si PASA → Workflow completo ✅ 
+*/
