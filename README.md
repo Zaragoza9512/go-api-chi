@@ -5,6 +5,22 @@
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-326CE5?style=flat&logo=kubernetes)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=flat&logo=postgresql)
 ![CI/CD](https://github.com/Zaragoza9512/go-api-chi/workflows/Go%20CI%2FCD%20Pipeline/badge.svg)
+![CI/CD Status](https://github.com/Zaragoza9512/go-api-chi/actions/workflows/ci.yml/badge.svg)
+
+API RESTful en Go con Chi, PostgreSQL, Docker y Kubernetes.
+
+## 🚀 Tech Stack
+- **Go 1.23** - Lenguaje de programación
+- **Chi** - Router HTTP ligero
+- **PostgreSQL** - Base de datos
+- **Docker** - Containerización
+- **Kubernetes** - Orquestación
+- **GitHub Actions** - CI/CD
+
+## 📦 Docker
+```bash
+docker pull zaragoza95/go-api-chi:latest
+```
 
 > API REST robusta en Go para gestión de productos con JWT, Docker y Kubernetes.
 
