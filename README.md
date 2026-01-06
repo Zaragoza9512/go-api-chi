@@ -4,6 +4,7 @@
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-326CE5?style=flat&logo=kubernetes)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=flat&logo=postgresql)
+![CI/CD](https://github.com/Zaragoza9512/go-api-chi/workflows/Go%20CI%2FCD%20Pipeline/badge.svg)
 
 > API REST robusta en Go para gestión de productos con JWT, Docker y Kubernetes.
 
@@ -349,13 +350,15 @@ Este proyecto es de código abierto para fines educativos.
 
 ## 🚀 Roadmap
 
+## 🚀 Roadmap
+
 - [ ] Implementar tabla de usuarios real
-- [ ] Agregar tests unitarios
+- [ ] Agregar tests unitarios ✅
 - [ ] Implementar paginación en listado de productos
 - [ ] Agregar categorías de productos
 - [ ] Implementar búsqueda y filtros
 - [ ] Deploy en Kubernetes
-- [ ] CI/CD con GitHub Actions
+- [ ] CI/CD con GitHub Actions ✅
 - [ ] Monitoreo con Prometheus/Grafana
 
 ---
