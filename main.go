@@ -10,6 +10,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	_ "github.com/lib/pq"
 )
 
@@ -50,6 +52,7 @@ func setupRouter(db *sql.DB) http.Handler {
 
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Logger)
+	r.Use(MetricsMiddleware)
 
 	// Middleware CORS
 	r.Use(cors.Handler(cors.Options{
@@ -79,6 +82,8 @@ func setupRouter(db *sql.DB) http.Handler {
 		r.Put("/{id}", UpdateProductHandler(db))
 		r.Delete("/{id}", DeleteProductHandler(db))
 	})
+
+	r.Handle("/metrics", promhttp.Handler())
 
 	return r
 }
