@@ -4,6 +4,8 @@
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-326CE5?style=flat&logo=kubernetes)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=flat&logo=postgresql)
+![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=Prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-F46800?style=flat&logo=Grafana&logoColor=white)
 ![CI/CD](https://github.com/Zaragoza9512/go-api-chi/workflows/Go%20CI%2FCD%20Pipeline/badge.svg)
 ![CI/CD Status](https://github.com/Zaragoza9512/go-api-chi/actions/workflows/ci.yml/badge.svg)
 
@@ -29,11 +31,35 @@ docker pull zaragoza95/go-api-chi:latest
 ## 📸 Vista Rápida
 
 ### Arquitectura
+
+**Básica:**
 ```
 ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
 │   Cliente    │ ───▶ │   API Go     │ ───▶ │  PostgreSQL  │
 │  (HTTP/JSON) │ ◀─── │ (Chi Router) │ ◀─── │   Database   │
 └──────────────┘      └──────────────┘      └──────────────┘
+```
+
+**Con Observabilidad:**
+```
+┌──────────────┐      ┌──────────────┐      ┌──────────────┐
+│   Cliente    │ ───▶ │   API Go     │ ───▶ │  PostgreSQL  │
+│  (HTTP/JSON) │      │ (Chi Router) │      │   Database   │
+└──────────────┘      └──────┬───────┘      └──────────────┘
+                             │
+                             │ GET /metrics (cada 30s)
+                             ▼
+                      ┌──────────────┐
+                      │  Prometheus  │
+                      │  (Métricas)  │
+                      └──────┬───────┘
+                             │
+                             │ PromQL queries
+                             ▼
+                      ┌──────────────┐
+                      │   Grafana    │
+                      │ (Dashboards) │
+                      └──────────────┘
 ```
 
 ### Ejemplo de uso
@@ -47,6 +73,16 @@ curl -X POST http://localhost:8080/login \
 curl -X GET http://localhost:8080/productos \
   -H "Authorization: Bearer {token}"
 ```
+
+---
+
+## 🚀 Acceso Rápido
+
+- 📖 **Documentación completa:** Ver [Endpoints](#endpoints)
+- 🐳 **Docker Hub:** [zaragoza95/go-api-chi](https://hub.docker.com/r/zaragoza95/go-api-chi)
+- 📊 **Dashboard Grafana:** [dashboard.json](./grafana/dashboard.json)
+- 🔧 **CI/CD Pipeline:** [GitHub Actions](.github/workflows/ci.yml)
+- 📈 **Métricas en vivo:** `http://localhost:9090` (Prometheus) | `http://localhost:3000` (Grafana)
 
 ---
 
@@ -296,6 +332,58 @@ docker stats
 
 ---
 
+## 📊 Monitoreo y Observabilidad
+
+El proyecto incluye un stack completo de observabilidad basado en **Prometheus** y **Grafana** para monitorear la salud de la API en tiempo real.
+
+### Dashboard (Método RED)
+![Grafana Dashboard](./grafana/dashboard-screenshot.png)
+*Dashboard en tiempo real mostrando métricas HTTP siguiendo la metodología RED*
+
+### Métricas Implementadas:
+
+#### 1. Application Metrics (RED Method)
+
+**Rate - Tráfico de peticiones:**
+```promql
+sum by (endpoint, method) (rate(http_requests_total[5m]))
+```
+
+**Errors - Tasa de errores HTTP:**
+```promql
+sum by (status) (rate(http_requests_total{status=~"4..|5.."}[5m]))
+```
+
+**Duration - Latencia P95 por endpoint:**
+```promql
+histogram_quantile(0.95, sum by (endpoint, le) (rate(http_request_duration_seconds_bucket[5m])))
+```
+
+#### 2. Runtime Metrics
+
+**Uso de Memoria RAM:**
+```promql
+go_memstats_alloc_bytes
+```
+
+**Goroutines activas:**
+```promql
+go_goroutines
+```
+
+**Requests en proceso ahora:**
+```promql
+http_requests_in_flight
+```
+
+### 🛠️ Cómo importar el Dashboard
+1.  Accede a Grafana en `http://localhost:3000` (User/Pass por defecto: `admin`).
+2.  Ve a **Dashboards** > **New** > **Import**.
+3.  Sube el archivo JSON ubicado en este repositorio: `./grafana/dashboard.json`.
+4.  Selecciona `Prometheus` como fuente de datos.
+
+---
+
 ## 🧪 Testing
 
 ### Probar endpoints con curl
@@ -366,17 +454,14 @@ Este proyecto es de código abierto para fines educativos.
 
 ## 🚀 Roadmap
 
-## 🚀 Roadmap
-
 - [ ] Implementar tabla de usuarios real
-- [ ] Agregar tests unitarios ✅
+- [x] Agregar tests unitarios ✅
 - [ ] Implementar paginación en listado de productos
 - [ ] Agregar categorías de productos
 - [ ] Implementar búsqueda y filtros
 - [ ] Deploy en Kubernetes
-- [ ] CI/CD con GitHub Actions ✅
-- [ ] Monitoreo con Prometheus/Grafana
-
+- [x] CI/CD con GitHub Actions ✅
+- [x] Monitoreo con Prometheus/Grafana ✅
 ---
 
 ⭐️ Si te gustó este proyecto, dale una estrella en GitHub!
