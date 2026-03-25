@@ -4,27 +4,43 @@
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-326CE5?style=flat&logo=kubernetes)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=flat&logo=postgresql)
+![Terraform](https://img.shields.io/badge/Terraform-1.14-7B42BC?style=flat&logo=terraform)
 ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=Prometheus&logoColor=white)
 ![Grafana](https://img.shields.io/badge/Grafana-F46800?style=flat&logo=Grafana&logoColor=white)
 ![CI/CD](https://github.com/Zaragoza9512/go-api-chi/workflows/Go%20CI%2FCD%20Pipeline/badge.svg)
 ![CI/CD Status](https://github.com/Zaragoza9512/go-api-chi/actions/workflows/ci.yml/badge.svg)
 
-API RESTful en Go con Chi, PostgreSQL, Docker y Kubernetes.
+API RESTful en Go con Chi, PostgreSQL, Docker, Terraform y Kubernetes.
 
 ## 🚀 Tech Stack
+
+**Backend:**
 - **Go 1.23** - Lenguaje de programación
 - **Chi** - Router HTTP ligero
-- **PostgreSQL** - Base de datos
+- **PostgreSQL** - Base de datos relacional
+
+**DevOps:**
 - **Docker** - Containerización
-- **Kubernetes** - Orquestación
-- **GitHub Actions** - CI/CD
+- **Docker Compose** - Orquestación local
+- **Terraform** - Infrastructure as Code
+- **GitHub Actions** - CI/CD pipeline
+
+**Cloud (AWS):**
+- **EC2** - Compute instances
+- **RDS** - Managed PostgreSQL
+- **S3** - Terraform state storage
+- **DynamoDB** - Terraform state locking
+
+**Observability:**
+- **Prometheus** - Métricas
+- **Grafana** - Dashboards
 
 ## 📦 Docker
 ```bash
 docker pull zaragoza95/go-api-chi:latest
 ```
 
-> API REST robusta en Go para gestión de productos con JWT, Docker y Kubernetes.
+> API REST robusta en Go para gestión de productos con JWT, Docker, Terraform y Kubernetes.
 
 ---
 
@@ -82,7 +98,9 @@ curl -X GET http://localhost:8080/productos \
 - 🐳 **Docker Hub:** [zaragoza95/go-api-chi](https://hub.docker.com/r/zaragoza95/go-api-chi)
 - 📊 **Dashboard Grafana:** [dashboard.json](./grafana/dashboard.json)
 - 🔧 **CI/CD Pipeline:** [GitHub Actions](.github/workflows/ci.yml)
+- ☁️ **Infraestructura:** [Terraform](./terraform/)
 - 📈 **Métricas en vivo:** `http://localhost:9090` (Prometheus) | `http://localhost:3000` (Grafana)
+- 🏗️ **Arquitectura:** [Diagramas detallados](./docs/architecture.md)
 
 ---
 
@@ -97,6 +115,10 @@ curl -X GET http://localhost:8080/productos \
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Variables de Entorno](#variables-de-entorno)
 - [Docker](#docker)
+- [Monitoreo y Observabilidad](#monitoreo-y-observabilidad)
+- [Infraestructura como Código](#infraestructura-como-código-terraform)
+- [Testing](#testing)
+- [Skills Demostradas](#skills-demostradas)
 
 ---
 
@@ -107,6 +129,10 @@ curl -X GET http://localhost:8080/productos \
 - ✅ Middleware de seguridad
 - ✅ Dockerizado con Docker Compose
 - ✅ Base de datos PostgreSQL
+- ✅ Infrastructure as Code con Terraform
+- ✅ Remote State en S3
+- ✅ CI/CD con GitHub Actions
+- ✅ Monitoreo con Prometheus/Grafana
 - ✅ Health checks
 - ✅ Validación de datos
 
@@ -119,6 +145,10 @@ curl -X GET http://localhost:8080/productos \
 - **Base de Datos:** PostgreSQL 15
 - **Autenticación:** JWT (JSON Web Tokens)
 - **Containerización:** Docker & Docker Compose
+- **Infrastructure as Code:** Terraform
+- **Cloud Provider:** AWS (EC2, RDS, S3, DynamoDB)
+- **CI/CD:** GitHub Actions
+- **Monitoreo:** Prometheus + Grafana
 - **ORM/Database:** database/sql (stdlib)
 
 ---
@@ -128,6 +158,8 @@ curl -X GET http://localhost:8080/productos \
 - [Go](https://golang.org/dl/) 1.23 o superior
 - [Docker](https://docs.docker.com/get-docker/) 20.10+
 - [Docker Compose](https://docs.docker.com/compose/install/) v2.0+
+- [Terraform](https://www.terraform.io/downloads) 1.14+ (opcional, para infraestructura)
+- [AWS CLI](https://aws.amazon.com/cli/) (opcional, para Terraform)
 - Git
 
 ---
@@ -279,7 +311,16 @@ go-api-chi/
 ├── .env.example        # Plantilla de variables de entorno
 ├── .gitignore          # Archivos ignorados por Git
 ├── go.mod              # Dependencias del proyecto
-└── README.md           # Documentación
+├── terraform/          # Infrastructure as Code
+│   ├── backend.tf      # Configuración de Remote State
+│   ├── variables.tf    # Variables de Terraform
+│   ├── main.tf        # Recursos AWS (EC2, RDS)
+│   ├── outputs.tf     # Outputs de infraestructura
+│   └── README.md      # Documentación de Terraform
+├── .github/
+│   └── workflows/
+│       └── ci.yml     # Pipeline de CI/CD
+└── README.md          # Este archivo
 ```
 
 ---
@@ -384,6 +425,78 @@ http_requests_in_flight
 
 ---
 
+## ☁️ Infraestructura como Código (Terraform)
+
+El proyecto incluye configuración completa de infraestructura en AWS usando Terraform con Remote State.
+
+### Recursos Gestionados
+
+**Compute:**
+- EC2 (t3.micro) - Servidor de aplicación
+- AMI dinámica (Amazon Linux 2023 más reciente)
+- Security Groups configurados
+
+**Base de Datos:**
+- RDS PostgreSQL 17.2 (db.t4g.micro)
+- 20 GB de almacenamiento SSD (gp3)
+- Private subnet (no accesible desde internet)
+- Backup automático configurado
+
+**State Management:**
+- Remote State en S3 con versionamiento
+- State Locking con DynamoDB
+- Encriptación habilitada
+
+### Estructura Terraform
+```
+terraform/
+├── backend.tf              # Configuración de Remote State
+├── variables.tf            # Variables parametrizadas
+├── main.tf                # Recursos (EC2 + RDS)
+├── outputs.tf             # Outputs (IPs, endpoints)
+├── terraform.tfvars.example
+├── .gitignore             # Protección de secretos
+└── README.md              # Documentación detallada
+```
+
+### Uso
+```bash
+cd terraform
+
+# Configurar variables
+cp terraform.tfvars.example terraform.tfvars
+nano terraform.tfvars  # Editar contraseña de BD
+
+# Inicializar (configura Remote State en S3)
+terraform init
+
+# Ver plan de ejecución
+terraform plan
+
+# Aplicar cambios
+terraform apply
+
+# Ver outputs (IPs, endpoints)
+terraform output
+
+# Destruir infraestructura
+terraform destroy
+```
+
+### Variables Principales
+
+| Variable | Descripción | Default |
+|----------|-------------|---------|
+| `aws_region` | Región de AWS | `us-east-1` |
+| `instance_type` | Tipo de instancia EC2 | `t3.micro` |
+| `db_instance_class` | Tamaño de RDS | `db.t4g.micro` |
+| `db_engine_version` | Versión de PostgreSQL | `17.2` |
+| `db_password` | Contraseña de BD | (requerido) |
+
+Ver documentación completa en [`terraform/README.md`](./terraform/README.md)
+
+---
+
 ## 🧪 Testing
 
 ### Probar endpoints con curl
@@ -406,6 +519,7 @@ curl -X GET http://localhost:8080/productos \
 - Los datos persisten en volúmenes Docker aunque se detengan los contenedores
 - El usuario/password de login actual está hardcodeado (próxima versión: tabla de usuarios)
 - Para producción: cambiar `JWT_SECRET` y credenciales de BD
+- Terraform state se guarda en S3, no en el repositorio
 
 ---
 
@@ -431,16 +545,37 @@ Este proyecto es de código abierto para fines educativos.
 - ✅ API REST con Chi Router
 - ✅ Autenticación JWT
 - ✅ CRUD completo con PostgreSQL
+- ✅ Middleware de seguridad
+- ✅ Manejo de errores
 
 ### DevOps & Infrastructure
 - ✅ Dockerización con multi-stage builds
-- ✅ Kubernetes manifests (Deployments, Services)
-- ✅ Gestión de volúmenes persistentes
+- ✅ Docker Compose para orquestación local
+- ✅ Infrastructure as Code con Terraform
+- ✅ Remote State en S3 + DynamoDB
+- ✅ CI/CD con GitHub Actions
+
+### Cloud & AWS
+- ✅ EC2 (instancias, AMIs, Security Groups)
+- ✅ RDS PostgreSQL (managed databases)
+- ✅ S3 (state storage, versionamiento)
+- ✅ DynamoDB (state locking)
+- ✅ VPC y networking
+
+### Observability
+- ✅ Métricas con Prometheus
+- ✅ Dashboards en Grafana
+- ✅ Metodología RED (Rate, Errors, Duration)
+- ✅ Monitoreo de runtime (memoria, goroutines)
 
 ### Best Practices
 - ✅ Git flow con commits descriptivos
-- ✅ Documentación completa
+- ✅ Documentación completa y profesional
 - ✅ Código modular y mantenible
+- ✅ Versionamiento de infraestructura
+- ✅ Separación de secretos (.gitignore)
+- ✅ Variables de entorno
+- ✅ Health checks
 
 ---
 
@@ -462,6 +597,9 @@ Este proyecto es de código abierto para fines educativos.
 - [ ] Deploy en Kubernetes
 - [x] CI/CD con GitHub Actions ✅
 - [x] Monitoreo con Prometheus/Grafana ✅
+- [x] Infrastructure as Code con Terraform ✅
+- [x] Remote State en S3 ✅
+
 ---
 
 ⭐️ Si te gustó este proyecto, dale una estrella en GitHub!
