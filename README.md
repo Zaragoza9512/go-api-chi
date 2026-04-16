@@ -522,15 +522,19 @@ curl -X GET http://localhost:8080/productos \
 - Terraform state se guarda en S3, no en el repositorio
 
 ---
-
 ## 🤝 Contribuir
+
+¡Las contribuciones son bienvenidas! Por favor lee nuestra [Guía de Contribución](CONTRIBUTING.md) antes de enviar un Pull Request.
+
+### Quick Start
 
 1. Fork el proyecto
 2. Crea una rama (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -m 'Agregar nueva funcionalidad'`)
+3. Commit tus cambios (`git commit -m 'feat: agregar nueva funcionalidad'`)
 4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
 5. Abre un Pull Request
 
+Ver [CONTRIBUTING.md](CONTRIBUTING.md) para detalles completos.
 ---
 
 ## 📄 Licencia
