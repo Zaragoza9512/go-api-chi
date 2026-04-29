@@ -200,26 +200,33 @@ func DeleteProductHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-func LogingHandler(w http.ResponseWriter, r *http.Request) {
-	var request LoginRequest
+func LoginHandler(db *sql.DB, secretKey string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var request LoginRequest
 
-	err := json.NewDecoder(r.Body).Decode(&request)
-	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return // Detenemos la función aquí
-	}
-	const userID = 123
-	const userRole = "admin"
-	tokenString, err := GenerateToken(userID, userRole, jwtSecretKey)
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
 
-	if err != nil {
-		http.Error(w, "Error generating token", http.StatusInternalServerError)
-		return // Detenemos la función aquí
+		user, err := AuthenticateUser(db, request.Username, request.Password)
+		if err != nil {
+			http.Error(w, "Credenciales inválidas", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString, err := GenerateToken(user.ID, user.Role, secretKey)
+		if err != nil {
+			http.Error(w, "Error generating token", http.StatusInternalServerError)
+			return
+		}
+
+		response := LogingResponse{Token: tokenString}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(response)
 	}
-	response := LogingResponse{Token: tokenString}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
 }
 
 /*

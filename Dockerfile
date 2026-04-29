@@ -3,7 +3,7 @@
 # ====================================================================
 
 # Etapa 1: Builder (compilar el binario Go)
-FROM golang:1.23-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 # Instalar dependencias necesarias
 RUN apk add --no-cache git
