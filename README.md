@@ -517,7 +517,7 @@ curl -X GET http://localhost:8080/productos \
 
 - La base de datos se inicializa automáticamente con datos de prueba (ver `init.sql`)
 - Los datos persisten en volúmenes Docker aunque se detengan los contenedores
-- El usuario/password de login actual está hardcodeado (próxima versión: tabla de usuarios)
+- La autenticación usa bcrypt + PostgreSQL. El usuario inicial se crea via `init.sql`
 - Para producción: cambiar `JWT_SECRET` y credenciales de BD
 - Terraform state se guarda en S3, no en el repositorio
 
@@ -593,7 +593,7 @@ Este proyecto es de código abierto para fines educativos.
 
 ## 🚀 Roadmap
 
-- [ ] Implementar tabla de usuarios real
+- [x] Implementar tabla de usuarios real ✅
 - [x] Agregar tests unitarios ✅
 - [ ] Implementar paginación en listado de productos
 - [ ] Agregar categorías de productos
